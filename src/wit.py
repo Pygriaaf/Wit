@@ -1,6 +1,14 @@
 import sys
 from getpass import getuser
 from os import mkdir
+from shutil import copy
+
+def debug(return_words=None,if_return_words=False,if_exit=False):
+    if return_words:
+        print(return_words)
+    if if_exit:
+        exit()
+
 
 class Command():
     def cmd_init(self,parameter):
@@ -32,7 +40,13 @@ class Command():
         make_doc_file.close()
 
     def cmd_add(self,parameter):
-        pass
+        if len(parameter) > 2:
+            print("错误:没有找到选项或参数'%s'!" % ('\',\''.join(parameter[2:])))
+            exit()
+        open_filename = open("./.wit/filename")
+        filename = open_filename.readline()
+        open_filename.close()
+        copy('./%s' % (filename,),'./.wit/storage')
     def cmd_commit(self,parameter):
         pass
 
