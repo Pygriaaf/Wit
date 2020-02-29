@@ -90,7 +90,7 @@ class Command():
             exit()
         if getsize('./.wit/history/%s.htrc' % (branch_pointer,)) == 0: #"空记录"判断
             move('./.wit/storage/' + filename,'./.wit/history/master/%s.%s' % (hashsha1,filename.split('.')[1]))
-            open_historyrecord = open('./.wit/history/%s.htrc' % (branch_pointer),'a')
+            open_historyrecord = open('./.wit/history/%s.htrc' % (branch_pointer),'a',encoding='utf-8')
             open_historyrecord.write(
                 'ID:'+hashsha1+' '+'Time:'+('%s-%s-%s-%s-%s-%s' % localtime()[:6])+' '+'Message:'+parameter[0]+' '+'Tag:'+' '+'Point:'+'\n'
             )
@@ -107,7 +107,7 @@ class Command():
             open_pointer.close()
             if historyrecord_newest_pointer == hash_pointer: #指针指向判断
                 move('./.wit/storage/' + filename,'./.wit/history/master/%s.%s' % (hashsha1,filename.split('.')[1]))
-                open_historyrecord = open('./.wit/history/%s.htrc' % (branch_pointer),'a')
+                open_historyrecord = open('./.wit/history/%s.htrc' % (branch_pointer),'a',encoding='utf-8')
                 open_historyrecord.write(
                     'ID:'+hashsha1+' '+'Time:'+('%s-%s-%s-%s-%s-%s' % localtime()[:6])+' '+'Message:'+parameter[0]+' '+'Tag:'+' '+'Point:'+'\n'
                 )
@@ -121,11 +121,18 @@ class Command():
 
 def main():
     user_input = sys.argv[1:] #获取参数
-    #try:
-    cmd = getattr(Command,"cmd_" + user_input[0]) #命令入口
-    #except:
-        #print("没有找到" + user_input[0] + "命令.")
-        #exit()
+    if user_input == []:
+        print('''
+init [项目名] [文件名]  创建Wit项目
+add                     提交文件至暂存区
+commit [说明]           提交文件至历史记录
+        ''')
+        exit()
+    try:
+        cmd = getattr(Command,"cmd_" + user_input[0]) #命令入口
+    except AttributeError:
+        print("错误:没有找到" + user_input[0] + "命令.")
+        exit()
     cmd(cmd,user_input[1:]) #执行命令
 
 if __name__ == '__main__': #程序入口
