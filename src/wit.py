@@ -1,6 +1,6 @@
 #文件名:wit.py
 #作者:Pygriaaf
-#版权:GPL v3.0 (C) Pygriaaf
+#版权:GPL v3.0 (C) 2020 Pygriaaf
 #时间:2020-2-24
 #邮箱:pygriaaf@163.com
 
@@ -31,7 +31,7 @@ class Command():
             print("错误:'%s' 不是Word文档!请输入带有'.doc' 或 '.docx'后缀的文件名." % (parameter[1],))
             exit()
         if isdir(getcwd() + '\\' + parameter[0]): #判断目录是否已经被创建
-            print("错误:该目录下已存在%S目录，无法创建项目." % (parameter[0],))
+            print("错误:该目录下已存在%s目录，无法创建项目." % (parameter[0],))
             exit()
         #创建项目文件 = 执行init命令
         mkdir(getcwd() + ("\\%s" % (parameter[0],)))
