@@ -17,7 +17,6 @@ def debug(return_words=None,if_return_words=False,if_exit=False):
     if if_exit:
         exit()
 
-
 class Command():
     def cmd_init(self,parameter):
         #错误输入处理
@@ -44,22 +43,24 @@ class Command():
         init_make_pointer = open(getcwd() + ("\\%s\\.wit\\pointer" % (parameter[0],)),'x')
         init_make_pointer.write('master:nohistories')
         init_make_pointer.close()
+        init_make_filename = open(getcwd() + ("\\%s\\.wit\\branchname" % (parameter[0],)),'x')
+        init_make_filename.write('master,')
+        init_make_filename.close()
         init_make_record = open(getcwd() + ("\\%s\\.wit\\history\\master.htrc" % (parameter[0],)),"x")
         init_make_record.close()
         mkdir(getcwd() + ("\\%s\\.wit\\history\\master" % (parameter[0],)))
         make_doc_file = open(getcwd() + ("\\%s\\%s" % (parameter[0],parameter[1])),'x')
         make_doc_file.close()
-
     def cmd_add(self,parameter):
         #错误输入处理
-        if len(parameter) > 2:
-            print("错误:没有找到选项或参数'%s'." % ('\',\''.join(parameter[2:])))
+        if len(parameter) > 0:
+            print("错误:没有找到选项或参数'%s'." % ('\',\''.join(parameter[0:])))
             exit()
         if not isdir(getcwd() + '\\.wit'): #判断是否是项目目录
             print("错误:该目录不是wit项目，无法使用add命令.")
             exit()
         #将文件复制到暂存区 = 执行add命令
-        open_filename = open("./.wit/filename",'r')
+        open_filename = open("./.wit/filename",'r',encoding='utf-8')
         filename = open_filename.read()
         open_filename.close()
         copy('./%s' % (filename,),'./.wit/storage')
@@ -78,7 +79,7 @@ class Command():
         open_pointer = open('./.wit/pointer','r')
         branch_pointer = open_pointer.read().split(':')[0]
         open_pointer.close()
-        open_filename = open("./.wit/filename",'r')
+        open_filename = open("./.wit/filename",'r',encoding='utf-8')
         filename = open_filename.read()
         open_filename.close()
         try: #判断暂存区是否有文件
@@ -88,7 +89,7 @@ class Command():
         except:
             print("错误:暂存区里没有文件!请使用add命令将文件移至暂存区.")
             exit()
-        if getsize('./.wit/history/%s.htrc' % (branch_pointer,)) == 0: #"空记录"判断
+        if not getsize('./.wit/history/%s.htrc' % (branch_pointer,)): #"空记录"判断
             move('./.wit/storage/' + filename,'./.wit/history/master/%s.%s' % (hashsha1,filename.split('.')[1]))
             open_historyrecord = open('./.wit/history/%s.htrc' % (branch_pointer),'a',encoding='utf-8')
             open_historyrecord.write(
@@ -99,7 +100,7 @@ class Command():
             open_pointer.write(branch_pointer + ':' + hashsha1)
             open_pointer.close()
         else:
-            open_historyrecord = open('./.wit/history/%s.htrc' % (branch_pointer),'r')
+            open_historyrecord = open('./.wit/history/%s.htrc' % (branch_pointer),'r',encoding='utf-8')
             historyrecord_newest_pointer = open_historyrecord.readlines()[-1][:-1].split(' ')[0].split(':')[1]
             open_historyrecord.close()
             open_pointer = open('./.wit/pointer','r')
@@ -112,20 +113,160 @@ class Command():
                     'ID:'+hashsha1+' '+'Time:'+('%s-%s-%s-%s-%s-%s' % localtime()[:6])+' '+'Message:'+parameter[0]+' '+'Tag:'+' '+'Point:'+'\n'
                 )
                 open_historyrecord.close()
-                open_pointer = open('./.wit/pointer','w')
+                open_pointer = open('./.wit/pointer','w',encoding='utf-8')
                 open_pointer.write(branch_pointer + ':' + hashsha1)
                 open_pointer.close()
             else:
                 print("错误:当前文件指针没有指向最新历史记录,无法提交文件.")
                 exit()
+    def cmd_log(self,parameter):
+        #错误输入判断
+        if len(parameter) > 1:
+            print("错误:没有找到选项或参数'%s'." % ('\',\''.join(parameter[1:])))
+            exit()
+        if parameter == []: #如果输入参数为空时
+            #读取文件
+            open_pointer = open('./.wit/pointer','r',encoding='utf-8')
+            pointer = open_pointer.read()
+            open_pointer.close()
+            if not getsize('./.wit/history/%s.htrc' % (pointer.split(':')[0],)): #空记录判断
+                print('错误:%s分支没有记录.' % (pointer.split(':')[0],))
+                exit()
+            open_historyrecord = open('./.wit/history/%s.htrc' % (pointer.split(':')[0],),'r',encoding='utf-8')
+            historyrecord = open_historyrecord.readlines()[::-1]
+            open_historyrecord.close()
+            log_list = []
+            #读取记录
+            for historyrecord_oneline in historyrecord:
+                if not historyrecord.index(historyrecord_oneline): #当读取记录在最新记录时
+                    one_log_list = []
+                    if historyrecord_oneline[:-1].split(' ')[0].split(':')[1] == pointer.split(':')[1]:
+                        if historyrecord_oneline[:-1].split(' ')[4].split(':')[1]:
+                            log_1 = 'commit %s (%s <- pointer,Branch Point: %s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],pointer.split(':')[0],historyrecord_oneline[:-1].split(' ')[4].split(':')[1])
+                            one_log_list.append(log_1)
+                        else:
+                            log_1 = 'commit %s (%s <- pointer)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],pointer.split(':')[0])
+                            one_log_list.append(log_1)
+                    else:
+                        if historyrecord_oneline[:-1].split(' ')[4].split(':')[1]:
+                            log_1 = 'commit %s (%s,Branch Point: %s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],pointer.split(':')[1],historyrecord_oneline[:-1].split(' ')[4].split(':')[1])
+                            one_log_list.append(log_1)
+                        else:
+                            log_1 = 'commit %s (%s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],pointer.split(':')[1])
+                            one_log_list.append(log_1)
+                    log_2 = 'Time: %s' % (historyrecord_oneline[:-1].split(' ')[1].split(':')[1])
+                    one_log_list.append(log_2)
+                    if  historyrecord_oneline[:-1].split(' ')[3].split(':')[1]:
+                        log_3 = '\n   %s (Tag: %s)' % (historyrecord_oneline[:-1].split(' ')[2].split(':')[1],historyrecord_oneline[:-1].split(' ')[3].split(':')[1])
+                        one_log_list.append(log_3)
+                    else:
+                        log_3 = '\n   %s' % (historyrecord_oneline[:-1].split(' ')[2].split(':')[1],)
+                        one_log_list.append(log_3)
+                    log_list.append('\n'.join(one_log_list))
+                else:
+                    one_log_list = []
+                    if historyrecord_oneline[:-1].split(' ')[0].split(':')[1] == pointer.split(':')[1]:
+                        if historyrecord_oneline[:-1].split(' ')[4].split(':')[1]:
+                            log_1 = 'commit %s (<- pointer,Branch Point: %s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],historyrecord_oneline[:-1].split(' ')[4].split(':')[1])
+                            one_log_list.append(log_1)
+                        else:
+                            log_1 = 'commit %s (<- pointer)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1])
+                            one_log_list.append(log_1)
+                    else:
+                        if historyrecord_oneline[:-1].split(' ')[4].split(':')[1]:
+                            log_1 = 'commit %s (Branch Point: %s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],historyrecord_oneline[:-1].split(' ')[4].split(':')[1])
+                            one_log_list.append(log_1)
+                        else:
+                            log_1 = 'commit %s' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1])
+                            one_log_list.append(log_1)
+                        log_2 = 'Time: %s' % (historyrecord_oneline[:-1].split(' ')[1].split(':')[1])
+                        one_log_list.append(log_2)
+                        if historyrecord_oneline[:-1].split(' ')[3].split(':')[1] == 2:
+                            log_3 = '\n   %s (Tag: %s)' % (historyrecord_oneline[:-1].split(' ')[2].split(':')[1],historyrecord_oneline[:-1].split(' ')[3].split(':')[1])
+                            one_log_list.append(log_3)
+                        else:
+                            log_3 = '\n   %s' % (historyrecord_oneline[:-1].split(' ')[2].split(':')[1],)
+                            one_log_list.append(log_3)
+                            log_list.append('\n'.join(one_log_list))
+        else:
+            open_branchname = open('./.wit/branchname','r',encoding='utf-8')
+            branchname = open_branchname.read().split(',')
+            open_branchname.close()
+            if parameter[0] not in branchname: #判断是否存在分支
+                print("错误:项目里没有%s分支." % (parameter[0],))
+                exit()
+            if not getsize('./.wit/history/%s.htrc' % (parameter[0],)): #空记录判断
+                print('错误:%s分支没有记录.' % (parameter[0],))
+                exit()
+            open_pointer = open('./.wit/pointer','r',encoding='utf-8')
+            pointer = open_pointer.read()
+            open_pointer.close()
+            open_historyrecord = open('./.wit/history/%s.htrc' % (parameter[0],),'r',encoding='utf-8')
+            historyrecord = open_historyrecord.readlines()[::-1]
+            open_historyrecord.close()
+            log_list = []
+            #读取记录
+            for historyrecord_oneline in historyrecord:
+                if historyrecord.index(historyrecord_oneline) == 0:
+                    one_log_list = []
+                    if historyrecord_oneline[:-1].split(' ')[0].split(':')[1] == pointer.split(':')[1]:
+                        if historyrecord_oneline[:-1].split(' ')[4].split(':')[1]:
+                            log_1 = 'commit %s (%s <- pointer,Branch Point: %s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],pointer.split(':')[0],historyrecord_oneline[:-1].split(' ')[4].split(':')[1])
+                            one_log_list.append(log_1)
+                        else:
+                            log_1 = 'commit %s (%s <- pointer)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],pointer.split(':')[0])
+                            one_log_list.append(log_1)
+                    else:
+                        if historyrecord_oneline[:-1].split(' ')[4].split(':')[1]:
+                            log_1 = 'commit %s (%s,Branch Point: %s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],pointer.split(':')[1],historyrecord_oneline[:-1].split(' ')[4].split(':')[1])
+                            one_log_list.append(log_1)
+                        else:
+                            log_1 = 'commit %s (%s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],pointer.split(':')[1])
+                            one_log_list.append(log_1)
+                    log_2 = 'Time: %s' % (historyrecord_oneline[:-1].split(' ')[1].split(':')[1])
+                    one_log_list.append(log_2)
+                    if historyrecord_oneline[:-1].split(' ')[3].split(':')[1]:
+                        log_3 = '\n   %s (Tag: %s)' % (historyrecord_oneline[:-1].split(' ')[2].split(':')[1],historyrecord_oneline[:-1].split(' ')[3].split(':')[1])
+                        one_log_list.append(log_3)
+                    else:
+                        log_3 = '\n   %s' % (historyrecord_oneline[:-1].split(' ')[2].split(':')[1],)
+                        one_log_list.append(log_3)
+                    log_list.append('\n'.join(one_log_list))
+                else:
+                    one_log_list = []
+                    if historyrecord_oneline[:-1].split(' ')[0].split(':')[1] == pointer.split(':')[1]:
+                        if historyrecord_oneline[:-1].split(' ')[4].split(':')[1]:
+                            log_1 = 'commit %s (<- pointer,Branch Point: %s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],historyrecord_oneline[:-1].split(' ')[4].split(':')[1])
+                            one_log_list.append(log_1)
+                        else:
+                            log_1 = 'commit %s (<- pointer)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1])
+                            one_log_list.append(log_1)
+                    else:
+                        if historyrecord_oneline[:-1].split(' ')[4].split(':')[1]:
+                            log_1 = 'commit %s (Branch Point: %s)' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1],historyrecord_oneline[:-1].split(' ')[4].split(':')[1])
+                            one_log_list.append(log_1)
+                        else:
+                            log_1 = 'commit %s' % (historyrecord_oneline[:-1].split(' ')[0].split(':')[1])
+                            one_log_list.append(log_1)
+                        log_2 = 'Time: %s' % (historyrecord_oneline[:-1].split(' ')[1].split(':')[1])
+                        one_log_list.append(log_2)
+                    if historyrecord_oneline[:-1].split(' ')[3].split(':')[1]:
+                        log_3 = '\n   %s (Tag: %s)' % (historyrecord_oneline[:-1].split(' ')[2].split(':')[1],historyrecord_oneline[:-1].split(' ')[3].split(':')[1])
+                        one_log_list.append(log_3)
+                    else:
+                        log_3 = '\n   %s' % (historyrecord_oneline[:-1].split(' ')[2].split(':')[1],)
+                        one_log_list.append(log_3)
+                    log_list.append('\n'.join(one_log_list))
+        print('\n\n'.join(log_list)) #打印信息
 
 def main():
     user_input = sys.argv[1:] #获取参数
     if user_input == []:
         print('''
-init [项目名] [文件名]  创建Wit项目
-add                     提交文件至暂存区
-commit [说明]           提交文件至历史记录
+wit.py init [项目名] [文件名]  创建Wit项目
+wit.py add                     提交文件至暂存区
+wit.py commit [说明]           提交文件至历史记录
+wit.py log <分支名>            输出提交日志
         ''')
         exit()
     try:
