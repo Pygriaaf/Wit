@@ -258,6 +258,12 @@ class Command():
                         one_log_list.append(log_3)
                     log_list.append('\n'.join(one_log_list))
         print('\n\n'.join(log_list)) #打印信息
+    def cmd_checkout(self,parameter):
+        pass
+    def cmd_branch(self,parameter):
+        pass
+    def cmd_merge(self,parameter):
+        pass
 
 def main():
     user_input = sys.argv[1:] #获取参数

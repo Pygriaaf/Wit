@@ -1,9 +1,10 @@
 # Wit
 
-![](https://img.shields.io/badge/Download-setup.py-blue) ![](https://img.shields.io/badge/License-GPL%20v3.0-red) ![](https://img.shields.io/badge/Author-Pygriaaf-yellow)
+<a href="./setup/setup.py" download="setup.py">![](https://img.shields.io/badge/Download-setup.py-blue)</a> ![](https://img.shields.io/badge/License-GPL%20v3.0-red) ![](https://img.shields.io/badge/Author-Pygriaaf-yellow)
+
 Wit是一个基于Python编写的简单易用的文档文件的版本管理系统
 
-# 特点和功能
+# 特点与功能
 
 **特点**
 
@@ -13,7 +14,7 @@ Wit是一个基于Python编写的简单易用的文档文件的版本管理系�
 
 参照Git功能开发Wit。
 
-# 安装
+# 安装和更新
 
 **必须** 下载[Python](https://www.python.org/downloads/)，否则setup.py将无法安装Wit且Wit也无法使用。系统要求：Windows系统。
 
@@ -21,6 +22,8 @@ Wit是一个基于Python编写的简单易用的文档文件的版本管理系�
 >下载完毕后，打开，勾选“Add Python3.x to PATH”，然后点击“Install ”，便可安装。
 
 Python安装完毕后,点击setup.py，会弹出一个窗口，根据提示完成安装。
+
+更新类似上面。
 
 # 使用
 
