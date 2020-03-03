@@ -1,6 +1,6 @@
 # Wit
 
-<a href="./setup/setup.py" download="setup.py">![](https://img.shields.io/badge/Download-setup.py-blue)</a> ![](https://img.shields.io/badge/License-GPL%20v3.0-red) ![](https://img.shields.io/badge/Author-Pygriaaf-yellow)
+<a href="setup/setup.py" download="setup.py" onclick="return false;">![](https://img.shields.io/badge/Download-setup.py-blue)</a> ![](https://img.shields.io/badge/License-GPL%20v3.0-red) ![](https://img.shields.io/badge/Author-Pygriaaf-yellow)
 
 Wit是一个基于Python编写的简单易用的文档文件的版本管理系统
 
@@ -39,4 +39,4 @@ Pygriaaf
 
 # 许可
 
-GPL v3.0 &copy; 2020 Pygrif
+GPL v3.0 &copy; 2020 Pygriaaf
